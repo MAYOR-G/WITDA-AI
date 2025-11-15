@@ -16,7 +16,7 @@ except Exception:
     HarmBlockThreshold = None
 
 # -------- config --------
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBgh_mIOuYSR2xivOaSmMrJUD_bvhmEElM").strip()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "YOUR API KEY").strip()
 GEN_MODEL = os.getenv("GEN_MODEL", "gemini-2.5-flash").strip()
 EMB_MODEL = os.getenv("EMB_MODEL", "text-embedding-004").strip()
 
