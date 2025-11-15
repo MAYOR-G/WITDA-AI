@@ -1,0 +1,55 @@
+AI TOOLS,PURPOSE,USAGE SUMMARY,LINK
+Windsurf AI Code Editor,AI-assisted coding,Used to build Trust Fred and Fashion Styler; observed usage for MAT system and Trading Bot,
+ChatGPT,General assistance,"Used for brainstorming ideas, generating emails, writing PRDs, and debugging issues",
+Lovart	,Image generation,Generated images for basic designs and website pages,
+Open Manus,AI agent for research/content,"Searched personal finance topics, wrote scripts & slides",
+Gemini Studio,Prompt engineering,Used occasionally to brainstorm and refine prompts,
+Baby AGI,Code-based AI agent,Tried it but found responses lacking detail,
+Coqui TTS,Voice generation (TTS),Built voice lab for local speech synthesis,
+DIÁ (Nari Labs),Face animation synced to voice,,
+Leonardo AI,Image generation,Designed animation visuals,
+11Labs,AI voice cloning,Help to create voiceovers,
+Stitch (Google),UI/code generation,Generated UI designs from prompts,
+Mocha AI,Web UI design generation,Designed UI for Fashion Styler project,
+NotebookLM (Google),	AI research and writing assistant,Used to organize research sources and generate content; currently being used to develop a course outline,
+,,,
+,,,
+Doctronic,AI-powered document intelligence platform.,"Automates document processing, extracts structured data from medical/legal forms, and enhances compliance workflows.",https://www.doctronic.ai/
+Monai,Open-source deep learning framework for medical imaging.,"Provides tools and models for CT, MRI, X-ray analysis; accelerates healthcare AI research.",https://monai.io/
+The Bloke/ TinyLlama,Lightweight large language model optimized for efficiency.,"Run conversational AI and reasoning tasks on limited hardware (edge devices, laptops).",https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/blob/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
+bytedance/UI-TARS-desktop,Desktop AI assistant framework.,"Builds user interfaces for multi-modal AI apps, enabling personal AI assistants on desktop.",https://arxiv.org/abs/2505.08842
+Codedex,AI-driven coding education platform.,Interactive lessons that teach coding with gamified exercises and AI support.,https://www.codedex.io/home
+ServiceNow University,Cloud learning platform for AI + workflow automation.,Train developers on ServiceNow’s automation and AI-powered IT workflows.,https://learning.servicenow.com/now/lxp/home
+Claudeai,Conversational AI by Anthropic.,"alternative to GPT, used for reasoning, writing, coding, and research assistance.",https://claude.ai/new
+Perplexityai,AI-powered search and research assistant.,Combines web search + LLMs to deliver cited answers and knowledge discovery.,https://www.perplexity.ai/
+Pictory,AI video generation platform.,"Turns blog posts, scripts, or long videos into short, shareable video content.",https://app.pictory.ai/home
+Zapierai,Workflow automation with AI triggers.,"Connects 5,000+ apps (Slack, Gmail, Notion, etc.) with AI-enhanced automation flows.",https://agents.zapier.com/bots?utm_campaign=zpr-gbl-nua-evr-product_sidenav-prd&utm_medium=product&utm_source=zapier
+Abridge,Clinical AI for healthcare conversations.,Records and summarizes doctor-patient interactions into structured medical notes.,https://www.abridge.com/
+Qwenai,Open-source LLM by Alibaba.,"Multi-language, scalable models for chatbots, reasoning, and enterprise AI tasks.",https://qwen.ai/home
+Vercel,Frontend cloud hosting & AI integration.,Deploy AI-powered web apps with Next.js and serverless functions.,https://vercel.com/
+Developer Roadmap,Open-source learning guide for developers.,"Provides structured roadmaps for learning AI, ML, frontend, backend, and devops.",https://roadmap.sh/roadmaps
+Deepsite,AI research visualization platform.,Experimental HuggingFace project for showcasing ML model insights.,https://enzostvs-deepsite.hf.space/projects
+AI for begineers,Educational curriculum for AI fundamentals.,"Hands-on tutorials, labs, and projects to teach AI basics.",https://github.com/microsoft/AI-For-Beginners?tab=readme-ov-filee
+Truffle security,Secret-scanning AI security tool.,"Detects API keys, credentials, and secrets in codebases and repos.",https://github.com/trufflesecurity/trufflehog
+Skiff,End-to-end encrypted collaboration suite.,"Secure docs, email, and workspace with privacy-first AI features.",https://skiff-org.github.io/whitepaper/Skiff_Whitepaper_2022.pdf
+Fhirbase,Open-source FHIR database.,Stores and manages healthcare records using FHIR standards for AI/ML integration.,https://github.com/fhirbase/fhirbase
+Danswer,Retrieval-Augmented Generation (RAG) platform.,Build private AI assistants that search across internal docs and return precise answers.,https://github.com/tooploox/danswer?utm_source=chatgpt.com
+Apache superset,Open-source data exploration and visualization platform.,"Build dashboards, analytics, and data-driven insights.",https://github.com/apache/superset
+Rasa,Conversational AI framework.,Develops chatbots and assistants with NLP/NLU pipelines and custom integrations.,https://github.com/RasaHQ/rasa
+Librechat,Self-hosted ChatGPT alternative.,Run LLMs locally with a ChatGPT-like web UI.,https://github.com/danny-avila/LibreChat?utm_source=chatgpt.com
+Scira,Research AI assistant.,"Summarizes, analyzes, and finds academic resources for researchers",https://github.com/zaidmukaddam/scira?utm_source=chatgpt.com
+Anything llm,Plug-and-play local AI platform.,"Runs multiple LLMs (Llama, Mistral, Qwen, etc.) with retrieval, memory, and RAG pipelines.",https://github.com/Mintplex-Labs/anything-llm?utm_source=chatgpt.com
+Automatisch,open source tool to automate tasks & connect apps ,"Clone the repo, run it (e.g. via Docker), set up workflows through the UI or API, and optionally self-host for full control.",https://github.com/automatisch/automatisch?utm_source=chatgpt.com
+OpenRefine,"A free, open-source tool for cleaning, transforming, and augmenting messy data.","Download or clone it, run the app (locally via its scripts), load a dataset, and apply transformations, facets, and reconciliation operations to clean and reshape the data. ",https://github.com/OpenRefine/OpenRefine?utm_source=chatgpt.com
+Ultralytics HUB,"A no-code / low-code web platform to train, manage, and deploy YOLO models. ","Sign up, upload a dataset or pick a pre-trained model, train using the platform, preview the results (even on mobile), and export/deploy your model.",https://hub.ultralytics.com/
+Qwen Chat,"An AI assistant that supports multimodal tasks (chat, image/video understanding, generation, document processing)","Go to chat.qwen.ai, interact through the chat interface (text, images, files), and use its features like web search, generation, and document handling.",https://chat.qwen.ai/
+Metabase,"An open-source business intelligence tool to query, visualize, and share insights from your data","Deploy Metabase (self-hosted or cloud), connect to your database, build queries or dashboards via UI (or SQL), and share those visual insights with your team.",https://www.metabase.com/
+Claude,"An AI assistant for text, code, data analysis, and creative tasks — designed to be helpful, honest, and harmless.","Log in (web or app), start a chat, give prompts or upload files/data, optionally use built-in tools like the analysis tool to run code / analyze data.",https://claude.ai/new
+Morphic,"To help creators generate and edit stories, images, and videos using AI, moving from idea to cinematic output.","Log in → use the studio tools (Canvas, Copilot, Compose) to sketch or prompt scenes → edit or generate visuals/videos → output a polished story or visual content",https://www.morphic.com/en/
+Teable,"An AI-powered, no-code database platform for turning data into apps, automations, and insights.","Sign up or deploy, import or build tables via a spreadsheet-style UI, define automations and AI actions, visualize with views/dashboards, and connect/integrate with other systems.",https://teable.ai/
+Snapdeck,Generate presentation slides in seconds using AI.,"Enter a prompt (topic, audience, content) → AI builds slide layouts, themes, charts → edit and export your presentation.",https://www.snapdeck.app/
+LongCat Flash Thinking,"An open-source large reasoning model (560B params, MoE architecture) designed for advanced reasoning, agentic tasks, and efficient computation.","Use its chat template to prompt the model, optionally invoke tool calls, or deploy via supported frameworks (SGLang, vLLM) for inference.",https://github.com/meituan-longcat/LongCat-Flash-Thinking
+Warp,"A modern, AI-assisted terminal / development environment for developers.","Install Warp (available on macOS, Linux, Windows) → use its terminal interface enhanced with AI (suggestions, natural language command inputs) → save and reuse workflows via Warp Drive → collaborate or share terminal sessions.",https://www.warp.dev/
+Parlant,A framework to build LLM agents that consistently follow rules and business logic rather than relying only on prompts.,"Install Parlant, define “guidelines” (conditions → actions), attach tools/APIs, and run agents with controlled, explainable behavior.",https://github.com/emcie-co/parlant
+Agentic Context Engineering (ACE),A framework for evolving and refining prompt contexts so LLM agents improve over time without losing detail.,"Use ACE to manage context as a dynamic “playbook” that accumulates, reflects, curates, and updates strategies; apply it to both offline (system prompt) and online (agent memory) settings.",https://t.co/E4SDfLokvI
+Hera,AI motion-designer that converts text into professional motion graphics/animations,"Enter a prompt or choose a template → Hera generates animations → you customize style, timing, branding → export the video.",https://hera.video/

@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+google-generativeai
+chromadb
+pypdf
+beautifulsoup4
+markdownify
+python-multipart
+orjson
+requests
+# Added for OCR
+Pillow
+pytesseract

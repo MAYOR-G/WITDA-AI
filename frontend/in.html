@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WITDA-AI · Frontend</title>
+
+  <script>const API_BASE = (window.API_BASE || "http://localhost:8000");</script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
+          colors: {
+            background:'var(--bg)',
+            panel:'var(--panel)',
+            surface:'var(--surface)',
+            border:'var(--border)',
+            accent:{ DEFAULT:'var(--accent)', hover:'var(--accentHover)' },
+            text:{ primary:'var(--fg)', secondary:'var(--muted)', placeholder:'var(--placeholder)' }
+          },
+          boxShadow:{
+            'button-glow':'0 0 8px 2px rgba(99,102,241,.5)'
+          },
+          keyframes: {
+            pulseDots: { '0%, 20%':{opacity:.2}, '50%':{opacity:1}, '100%':{opacity:.2} }
+          },
+          animation: {
+            dot1:'pulseDots 1.2s infinite',
+            dot2:'pulseDots 1.2s .15s infinite',
+            dot3:'pulseDots 1.2s .3s infinite',
+            spin:'spin 1s linear infinite'
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+  <link id="hljs-dark" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/atom-one-dark.min.css">
+  <link id="hljs-light" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/vs2015.min.css" disabled>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+
+  <style>
+    :root {
+      /* Dark Mode (Default) */
+      --bg:#121212; --fg:#E5E7EB; --muted:#9CA3AF; --placeholder:#71717A;
+      --panel:#1E1E1E; --surface:#2A2A2A; --border:#3a3a3a; --accent:#6366F1; --accentHover:#4F46E5;
+    }
+    [data-theme="light"] {
+      /* Light Mode */
+      --bg:#ffffff; --fg:#111827; --muted:#6B7280; --placeholder:#9CA3AF;
+      --panel:#F9FAFB; --surface:#F3F4F6; --border:#E5E7EB; --accent:#4F46E5; --accentHover:#4338CA;
+    }
+    html, body { height:100%; }
+    body{ margin:0; background:var(--bg); color:var(--fg); font-family:Inter,system-ui,sans-serif; overflow:hidden; transition: background 0.2s, color 0.2s; }
+    ::-webkit-scrollbar{ width:8px; height:8px }
+    ::-webkit-scrollbar-thumb{ background:#3a3a3a; border-radius:9999px }
+    [data-theme="light"] ::-webkit-scrollbar-thumb{ background:#D1D5DB; }
+    
+    /* Markdown */
+    .markdown-body{ line-height:1.65; font-size:1rem; color:var(--fg) }
+    .markdown-body h1,.markdown-body h2,.markdown-body h3{ color:var(--fg); margin:.25rem 0 .5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
+    .markdown-body p{ margin:0 0 1rem }
+    .markdown-body a{ color:var(--accent); text-decoration:underline }
+    .markdown-body code{ color:var(--accent); background:var(--surface); padding:.125rem .25rem; border-radius:.25rem; font-family:ui-monospace,Menlo,Monaco,Roboto Mono,Courier New,monospace; font-size:.9em }
+    .markdown-body pre{ background:var(--panel); border:1px solid var(--border); border-radius:.5rem; overflow:auto }
+    .markdown-body pre code{ background:transparent; display:block; padding:1rem }
+    
+    /* [MODIFIED] Added 'Copy' button and wrapper styles */
+    .pre-wrapper { 
+      position: relative; 
+      margin-bottom: 1rem; 
+    }
+    .copy-button {
+      position: absolute; top: 0.5rem; right: 0.5rem;
+      background: var(--surface); color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      opacity: 0.3;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    .pre-wrapper:hover .copy-button { opacity: 1; }
+    .copy-button:hover { color: var(--fg); }
+    .copy-button:active { background: var(--border); }
+
+    /* [MODIFIED] Added 'inline-citation' styles */
+    .inline-citation {
+      color: var(--accent);
+      background-color: var(--surface);
+      padding: 0.1rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.8em;
+      font-family: ui-monospace,Menlo,Monaco,Roboto Mono,Courier New,monospace;
+    }
+
+    .message-row { width:100%; display:flex; padding-left:10rem; padding-right:10rem; margin-bottom:.75rem; }
+    @media (max-width: 1024px){ .message-row { padding-left:1rem; padding-right:1rem; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <details class="fixed right-4 bottom-4 opacity-30 hover:opacity-100 transition-opacity z-40">
+    <summary class="cursor-pointer text-xs">README & Run</summary>
+    <div class="mt-2 p-4 rounded-lg w-96 text-xs" style="background:var(--panel); border:1px solid var(--border); color:var(--fg);">
+      <h3 class="font-bold text-base mb-2">WITDA-AI Frontend</h3>
+      <ol class="list-decimal list-inside space-y-1">
+        <li>Install Tesseract OCR on your system (for image uploads).</li>
+        <li>Install Python deps: <code>pip install -r requirements.txt</code></li>
+        <li>Start API: <code>uvicorn app:app --reload --port 8000</code></li>
+        <li>Open this file in Chrome/Edge/Firefox.</li>
+      </ol>
+    </div>
+  </details>
+
+  <script type="text/babel">
+    const { useEffect, useMemo, useRef, useState } = React;
+
+    // ---------- utils ----------
+    const uuid = () =>
+      crypto.randomUUID?.() ??
+      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{
+        const r = Math.random()*16|0, v = c==='x'?r:(r&0x3|0x8); return v.toString(16);
+      });
+
+    const useLocal = (key, initial) => {
+      const [val, setVal] = useState(() => {
+        try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : initial; }
+        catch { return initial; }
+      });
+      useEffect(()=>{ try { localStorage.setItem(key, JSON.stringify(val)); } catch{} }, [key,val]);
+      return [val, setVal];
+    };
+
+    // [MODIFIED] Markdown component with Copy Button & Inline Citations
+    const Markdown = ({ text }) => {
+      const ref = useRef(null);
+      const html = useMemo(() => {
+        marked.setOptions({
+          highlight: (code, lang) => {
+            try { return hljs.highlight(code, { language: lang || 'plaintext' }).value; }
+            catch { return hljs.highlightAuto(code).value; }
+          },
+          breaks: true
+        });
+        
+        let rawHtml = marked.parse(text || "");
+
+        // [MODIFIED] Add highlighting for inline citations
+        // This regex finds patterns like (filename.pdf) or (AI TOOLS - Sheet1.csv)
+        const citationRegex = /\(([^)]+\.(?:[a-zA-Z0-9]+))\)/g;
+        rawHtml = rawHtml.replace(
+          citationRegex,
+          '(<span class="inline-citation">$1</span>)'
+        );
+        
+        return rawHtml;
+      }, [text]);
+
+      // [MODIFIED] Effect to add "Copy" buttons to code blocks
+      useEffect(() => {
+        if (ref.current) {
+          // Find all PRE tags
+          const pres = ref.current.querySelectorAll('pre');
+          pres.forEach(pre => {
+            // Prevent re-processing if wrapper already exists
+            if (pre.parentNode.classList.contains('pre-wrapper')) return;
+
+            // 1. Create wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'pre-wrapper';
+
+            // 2. Create button
+            const button = document.createElement('button');
+            button.className = 'copy-button';
+            button.innerText = 'Copy';
+
+            button.onclick = () => {
+              const code = pre.querySelector('code');
+              const textToCopy = code ? code.innerText : pre.innerText;
+              navigator.clipboard.writeText(textToCopy).then(() => {
+                button.innerText = 'Copied!';
+                setTimeout(() => { button.innerText = 'Copy'; }, 2000);
+              }, () => {
+                button.innerText = 'Error';
+                setTimeout(() => { button.innerText = 'Copy'; }, 2000);
+              });
+            };
+
+            // 3. DOM manipulation
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+            wrapper.appendChild(button);
+          });
+        }
+      }, [html]); // Re-run when HTML (and thus text) changes
+
+      return <div className="markdown-body" ref={ref} dangerouslySetInnerHTML={{ __html: html }} />;
+    };
+
+
+    // ---------- icons ----------
+    const Icon = {
+      Menu:(p={})=>(<svg {...p} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth={2}><path d='M4 6h16M4 12h16M4 18h16' strokeLinecap='round'/></svg>),
+      Plus:(p={})=>(<svg {...p} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth={2}><path d='M12 5v14M5 12h14' strokeLinecap='round' /></svg>),
+      Send:(p={})=>(<svg {...p} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth={2}><path d='M22 2L11 13' strokeLinecap='round' /><path d='M22 2l-7 20-4-9-9-4 20-7' strokeLinecap='round' strokeLinejoin='round' /></svg>),
+      Settings:(p={})=>(<svg {...p} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth={2}><path d='M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7' /><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c-.35 0-.7.08-1.02.22-.61.25-1 .85-1 1.51z' /></svg>),
+      Spinner: (p={}) => (<div className="animate-spin" style={{width:p.size||18,height:p.size||18,border:'2px solid #9CA3AF',borderTopColor:'transparent',borderRadius:'9999px'}}/>)
+    };
+
+    // ---------- layout ----------
+    const Header = ({ onToggleSidebar }) => (
+      <div className="flex-shrink-0 flex items-center justify-between w-full h-16 px-4 md:px-6 border-b"
+           style={{borderColor:'var(--border)'}}>
+        <div className="flex items-center gap-2">
+          <button onClick={onToggleSidebar} className="text-[color:var(--muted)] hover:text-[color:var(--fg)]" aria-label="Toggle sidebar">
+            <Icon.Menu width={22} height={22} />
+          </button>
+          <h1 className="text-lg font-semibold truncate">WITDA-AI</h1>
+        </div>
+        <div className="text-xs text-[color:var(--muted)]">Connected</div>
+      </div>
+    );
+
+    const ChatListItem = ({ title, isActive, onClick }) => (
+      <button onClick={onClick}
+        className={`w-full text-left px-3 py-2.5 rounded-lg text-sm truncate transition-colors ${
+          isActive ? 'bg-[color:var(--surface)] text-[color:var(--fg)] font-medium'
+                   : 'text-[color:var(--muted)] hover:bg-[color:var(--surface)] hover:text-[color:var(--fg)]'
+        }`}
+      >{title}</button>
+    );
+
+    const Sidebar = ({ isOpen, onClose, chats, currentChatId, onSelectChat, onCreateNewChat, isMobile, onOpenSettings }) => {
+      if (!isOpen) return null;
+      return (
+        <div className="h-screen w-72 flex-shrink-0 border-r flex flex-col" style={{ background:'var(--panel)', borderColor:'var(--border)'}}>
+          <div className="flex items-center justify-between p-3 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg" style={{background:'var(--accent)'}}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d='M12 2L2 7V17L12 22L22 17V7L12 2Z' fill='white' fillOpacity='.1' />
+                  <path d='M2 7L12 12L22 7M12 12V22' stroke='white' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />
+                </svg>
+              </span>
+              <span className="font-bold text-lg">WITDA-AI</span>
+            </div>
+            {isMobile && <button onClick={onClose} className="text-[color:var(--muted)] hover:text-[color:var(--fg)]">✕</button>}
+          </div>
+
+          <div className="px-3 pb-3 shrink-0">
+            <button onClick={onCreateNewChat} className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-colors"
+                    style={{ background:'var(--surface)', color:'var(--fg)'}}>
+              <span>New Chat</span><Icon.Plus width={18} height={18}/>
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto pt-2 space-y-1 pr-1">
+            <span className="text-xs font-medium px-4" style={{ color:'var(--muted)' }}>Today</span>
+            <div className="px-3 space-y-1">
+              {chats.length ? chats.map(c =>
+                <ChatListItem key={c.id} title={c.title} isActive={c.id===currentChatId} onClick={()=>onSelectChat(c.id)} />
+              ) : <p className="text-sm text-[color:var(--muted)] px-2 py-4 text-center">No chats yet.</p>}
+            </div>
+          </div>
+
+          <div className="p-3 border-t shrink-0" style={{ borderColor:'var(--border)'}}>
+            <button onClick={onOpenSettings} className="w-full flex items-center justify-between rounded-lg px-3 py-2 hover:opacity-90"
+                    style={{ background:'var(--surface)', color:'var(--fg)'}}>
+              <div className="flex items-center gap-3">
+                <span><Icon.Settings width={18} height={18} /></span><span>Settings</span>
+              </div>
+              <span className="text-[color:var(--muted)]">›</span>
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    // ---------- messages ----------
+    function SourceBadge({ tag }) {
+      // [MODIFIED] Added more tag colors
+      const color = {
+        'GitHub':'bg-[#0f172a]', 'Repo':'bg-[#0f172a]',
+        'Blog':'bg-[#0369a1]',
+        'Paper':'bg-[#3b82f6]',
+        'News':'bg-[#0ea5e9]',
+        'Docs':'bg-[#16a34a]',
+        'Image': 'bg-[#7c3aed]',
+        'Internal Doc': 'bg-[#ca8a04]',
+        'Web': 'bg-[#374151]'
+      }[tag] || 'bg-[#374151]';
+      return <span className={`text-[10px] ${color} text-white px-2 py-0.5 rounded-full mr-1`}>{tag}</span>;
+    }
+
+    function Sources({ sources }) {
+      if (!sources || !sources.length) return null;
+      return (
+        <div className="mt-3 border-t pt-3 text-sm" style={{borderColor:'var(--border)'}}>
+          <div className="mb-1 text-[color:var(--muted)] font-medium">Sources</div>
+          <ul className="space-y-1">
+            {sources.map((s, i) => (
+              <li key={i} className="flex flex-wrap items-center gap-2">
+                {s.tag && <SourceBadge tag={s.tag} />}
+                <a className="underline text-[color:var(--fg)] break-all" href={s.uri} target="_blank" rel="noreferrer" title={s.uri}>
+                  {s.name || s.uri}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+
+    const TypingDots = () => (
+      <span className="inline-flex items-center gap-1 text-[color:var(--muted)] text-sm">
+        <span className="w-2 h-2 rounded-full bg-[color:var(--muted)] animate-dot1"></span>
+        <span className="w-2 h-2 rounded-full bg-[color:var(--muted)] animate-dot2"></span>
+        <span className="w-2 h-2 rounded-full bg-[color:var(--muted)] animate-dot3"></span>
+      </span>
+    );
+
+    const Message = ({ message }) => {
+      const isUser = message.role === 'user';
+      return (
+        <div className={`message-row ${isUser ? 'justify-end' : 'justify-start'}`}>
+          <div className={`w-full ${isUser ? 'max-w-3xl' : 'max-w-5xl'}`}>
+            <div className={`${isUser
+              ? 'bg-[color:var(--surface)] border border-[color:var(--border)] rounded-2xl p-3'
+              : 'bg-transparent'
+            }`}>
+              {isUser ? (
+                <div className="markdown-body"><Markdown text={message.content}/></div>
+              ) : (
+                <div className="markdown-body">
+                  {message.loading ? (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Icon.Spinner/><span>Thinking</span><TypingDots/>
+                    </div>
+                  ) : (
+                    <>
+                      <Markdown text={message.content}/>
+                      <Sources sources={message.sources}/>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const MessageList = ({ messages }) => {
+      const endRef = useRef(null);
+      useEffect(()=>{ endRef.current?.scrollIntoView({ behavior:'smooth' }); },[messages]);
+      return (
+        <div className="w-full flex flex-col items-center py-6">
+          {messages.map(m => <Message key={m.id} message={m} />)}
+          <div ref={endRef} />
+        </div>
+      );
+    };
+
+    const Welcome = () => (
+      <div className="flex flex-col justify-center items-center text-center py-24">
+        <div className="p-4 rounded-2xl mb-5" style={{ background:'var(--accent)'}}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+            <path d='M12 2L2 7V17L12 22L22 17V7L12 2Z' fill='white' fillOpacity='.1' />
+            <path d='M2 7L12 12L22 7M12 12V22' stroke='white' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />
+          </svg>
+        </div>
+        <h2 className="text-3xl md:text-4xl font-bold">How can I help you?</h2>
+      </div>
+    );
+
+    // ---------- composer ----------
+    // [MODIFIED] Added 'default' mode
+    const MODES = [
+      { id:'default', label:'Default' },
+      { id:'deep_research', label:'Deep Research' },
+      { id:'brief_explanation', label:'Brief Explanation' },
+      { id:'learn', label:'Learn' }
+    ];
+
+    const Composer = ({ onSend, isSending, onInputChange }) => {
+      const [input,setInput] = useState('');
+      // [MODIFIED] Default mode is now 'default'
+      const [activeMode,setActiveMode] = useState('default');
+      const [files,setFiles] = useState([]);
+      const [linksText,setLinksText] = useState('');
+      const [isUploading, setIsUploading] = useState(false); // [MODIFIED] Added upload state
+      const fileInputRef = useRef(null);
+      const textareaRef = useRef(null);
+
+      useEffect(()=>{
+        if (textareaRef.current){
+          textareaRef.current.style.height='auto';
+          textareaRef.current.style.height=`${textareaRef.current.scrollHeight}px`;
+        }
+      },[input]);
+
+      const handleFileClick = ()=> fileInputRef.current?.click();
+      
+      // [MODIFIED] Improved file change handler with loading state
+      const handleFileChange = async (e)=>{
+        if (e.target.files.length === 0) return;
+        
+        const newFiles = Array.from(e.target.files);
+        setFiles(prev => [...prev, ...newFiles].slice(0, 5)); // Show files immediately
+        setIsUploading(true); // Show spinner
+        
+        const fd = new FormData();
+        newFiles.forEach(f => fd.append('files', f));
+        
+        try{
+          const res = await fetch(`${API_BASE}/upload`, { method:'POST', body: fd });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({message: 'Upload failed'}))
+            console.error('Upload error:', err.message);
+            // Remove failed files from UI
+            setFiles(prev => prev.filter(f => !newFiles.includes(f)));
+          } else {
+            const result = await res.json();
+            console.log('Upload success:', result);
+          }
+        }catch(err){ 
+          console.error('Upload fetch error:', err);
+          // Remove failed files from UI
+          setFiles(prev => prev.filter(f => !newFiles.includes(f)));
+        }
+        setIsUploading(false); // Hide spinner
+        e.target.value = null; // Allow re-uploading same file
+      };
+      const removeFile = (idx)=> setFiles(prev=>prev.filter((_,i)=>i!==idx));
+
+      const submit = ()=>{
+        const trimmed = input.trim();
+        // [MODIFIED] Allow sending with only files
+        if (!trimmed && files.length === 0) return; 
+        
+        const links = linksText.split(/[\s,]+/g).map(s=>s.trim()).filter(Boolean);
+        
+        // [MODIFIED] Send 'activeMode' (which is 'default' if not changed)
+        // Send a message about the files if input is empty
+        let messageToSend = trimmed;
+        if (!trimmed && files.length > 0) {
+            messageToSend = `I've uploaded ${files.length} file(s): ${files.map(f => f.name).join(', ')}. Please analyze them.`;
+        }
+        
+        onSend({ message: messageToSend, mode: activeMode, links });
+        setInput(''); setFiles([]); setLinksText('');
+        onInputChange && onInputChange(false);
+      };
+      
+      const onKeyDown = (e)=>{ if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); submit(); } };
+      const onTextChange = (e)=>{ setInput(e.target.value); onInputChange && onInputChange(e.target.value.trim().length > 0 || files.length > 0); };
+
+      // [MODIFIED] Simpler click handler
+      const handleModeClick = (modeId) => {
+        setActiveMode(modeId);
+      };
+
+      const hasInput = input.trim().length > 0 || files.length > 0;
+
+      return (
+        <div className="w-full flex justify-center px-4 pb-4 sticky bottom-0"
+             style={{ background:'linear-gradient(180deg, transparent, var(--bg) 40%)'}}>
+          <div className="w-full max-w-3xl border border-[color:var(--border)] rounded-2xl p-3 bg-[color:var(--surface)] shadow">
+            <div className="flex items-center flex-wrap gap-2 mb-3 px-1">
+              {MODES.map(m=>(
+                <button key={m.id} onClick={()=>handleModeClick(m.id)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${activeMode===m.id?'text-white shadow-button-glow':'text-[color:var(--muted)]'}`}
+                  style={{ background: activeMode===m.id ? 'var(--accent)':'var(--panel)' }}>
+                  {m.label}
+                </button>
+              ))}
+            </div>
+
+            {files.length > 0 &&
+              <div className="flex flex-wrap gap-2 mb-2 px-1">
+                {files.map((file,i)=>(
+                  <div key={i} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm border border-[color:var(--border)] bg-[color:var(--panel)]">
+                    <span className="truncate max-w-xs">{file.name}</span>
+                    <button onClick={()=>removeFile(i)} className="text-[color:var(--muted)] hover:text-[color:var(--fg)] rounded-full p-0.5">✕</button>
+                  </div>
+                ))}
+              </div>
+            }
+
+            <div className="flex items-start gap-2.5 mb-2">
+              <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple className="hidden"
+                     accept="image/*,application/pdf,.csv,.txt,.md,.markdown,.json" />
+              <button onClick={handleFileClick}
+                className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg border border-[color:var(--border)]"
+                aria-label="Add files">
+                {isUploading ? <Icon.Spinner size={20}/> : <Icon.Plus width={20} height={20} />}
+              </button>
+              <textarea ref={textareaRef} value={input} onChange={onTextChange} onKeyDown={onKeyDown}
+                placeholder="Message WITDA-AI (select a mode or just chat)"
+                className="flex-1 bg-transparent resize-none border-none outline-none py-2.5 max-h-40 overflow-y-auto"
+                rows={1}/>
+              <button onClick={submit} disabled={isSending || isUploading || !hasInput}
+                className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background:'var(--accent)'}}>
+                {isSending ? <Icon.Spinner size={18}/> : <Icon.Send width={18} height={18} />}
+              </button>
+            </div>
+
+            <input value={linksText} onChange={e=>setLinksText(e.target.value)}
+              placeholder="Optional: paste URLs to include (space/comma separated)"
+              className="w-full text-xs px-3 py-2 rounded-lg bg-transparent border border-[color:var(--border)]" />
+          </div>
+        </div>
+      );
+    };
+
+    // ---------- main chat area ----------
+    const ChatArea = ({ chat, onSend, isSending, onToggleSidebar }) => {
+      const [composerHasInput, setComposerHasInput] = useState(false);
+      const isNew = !chat || !chat.messages.length;
+      
+      const onComposerChange = (hasInput) => {
+        // Only update if state is different
+        if (hasInput !== composerHasInput) {
+          setComposerHasInput(hasInput);
+        }
+      };
+
+      return (
+        <div className="flex-1 h-screen flex flex-col">
+          <Header onToggleSidebar={onToggleSidebar} />
+          <div className="flex-1 overflow-y-auto">
+            {isNew && !composerHasInput ? <Welcome /> : <MessageList messages={chat?.messages || []} />}
+          </div>
+          <Composer onSend={onSend} isSending={isSending} onInputChange={onComposerChange} />
+        </div>
+      );
+    };
+
+    // ---------- app ----------
+    const App = () => {
+      const [isSidebarOpen,setIsSidebarOpen] = useState(window.innerWidth >= 1024);
+      const [chats,setChats] = useLocal('witda-ai-chats', []);
+      const [currentChatId,setCurrentChatId] = useLocal('witda-ai-current-id', null); // persist selection
+      const [isSending,setIsSending] = useState(false);
+      const [isMobile,setIsMobile] = useState(window.innerWidth < 768);
+      const [settingsOpen,setSettingsOpen] = useState(false);
+      const [theme, setTheme] = useLocal('witda-ai-theme', 'dark');
+
+      useEffect(()=>{
+        const onResize = ()=>{
+          const mobile = window.innerWidth < 768;
+          setIsMobile(mobile);
+          if (mobile) setIsSidebarOpen(false);
+        };
+        window.addEventListener('resize', onResize);
+        return ()=> window.removeEventListener('resize', onResize);
+      },[]);
+
+      useEffect(() => {
+        document.documentElement.dataset.theme = theme;
+        try {
+          document.getElementById('hljs-light').disabled = (theme !== 'light');
+          document.getElementById('hljs-dark').disabled = (theme !== 'dark');
+        } catch (e) {
+          console.error("Error toggling themes", e);
+        }
+      }, [theme]);
+
+      const currentChat = useMemo(()=> chats.find(c=>c.id===currentChatId) || null, [chats,currentChatId]);
+      const toggleSidebar = ()=> setIsSidebarOpen(o=>!o);
+      const createNewChat = ()=>{
+        const newId = uuid();
+        const newChat = { id:newId, title:'New Chat', messages:[], lastUpdated: new Date().toISOString() };
+        setChats(prev => [newChat, ...prev]);
+        setCurrentChatId(newId);
+        if (isMobile) setIsSidebarOpen(false);
+      };
+      const selectChat = (id)=>{ setCurrentChatId(id); if (isMobile) setIsSidebarOpen(false); };
+
+      async function callChatAPI(payload){
+        const res = await fetch(`${API_BASE}/chat`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(await res.text().catch(()=>`HTTP ${res.status}`));
+        return await res.json();
+      }
+
+      const onSend = async ({ message, mode, links })=>{
+        let chatId = currentChatId;
+        let isNewChat = !currentChat;
+
+        // Ensure a chat exists
+        if (isNewChat) {
+          const newId = uuid();
+          const title = message?.length>30 ? message.slice(0,27)+'…' : (message || 'New Chat');
+          const newChat = { id:newId, title, messages:[], lastUpdated:new Date().toISOString() };
+          setChats(prev => [newChat, ...prev]);
+          setCurrentChatId(newId);
+          chatId = newId;
+        }
+
+        // Optimistic user message
+        const userMsg = { id: uuid(), role:'user', content: message, attachments: [] };
+        setChats(prev => prev.map(c => {
+            if (c.id !== chatId) return c;
+            // [MODIFIED] Update title on first message of a new chat
+            const newTitle = (c.messages.length === 0) ? (message.slice(0,30) + (message.length > 30 ? '…' : '') || 'New Chat') : c.title;
+            return { ...c, title: newTitle, messages:[...c.messages, userMsg], lastUpdated: new Date().toISOString() }
+        }));
+
+        // Placeholder assistant (typing)
+        const placeholderId = uuid();
+        const loadingMsg = { id: placeholderId, role:'assistant', loading:true, content:"" };
+        setChats(prev => prev.map(c => c.id===chatId ? { ...c, messages:[...c.messages, loadingMsg] } : c));
+
+        setIsSending(true);
+        try{
+          // [MODIFIED] Send 'mode' (which is now 'default' if none selected)
+          // [MODIFIED] Send chat_id to enable history
+          const api = await callChatAPI({ message, mode, chat_id: chatId, links });
+          
+          // Replace placeholder with final message
+          const assistantMsg = {
+            id: uuid(),
+            role:'assistant',
+            content: api.content || api.answer || '(no content)',
+            sources: api.sources || []
+          };
+          setChats(prev => prev.map(c => {
+            if (c.id !== chatId) return c;
+            // [MODIFIED] Use the chat_id from the API response
+            return {
+              ...c,
+              id: api.chat_id || chatId, 
+              messages: c.messages.map(m => m.id===placeholderId ? assistantMsg : m),
+              lastUpdated: new Date().toISOString()
+            };
+          }));
+          // [MODIFIED] Ensure currentChatId is updated if API returns a new one
+          if (api.chat_id && api.chat_id !== currentChatId) {
+            setCurrentChatId(api.chat_id);
+          }
+        }catch(err){
+          const errorMsg = { id: uuid(), role:'assistant', content: `**Error:** ${String(err.message||err)}` };
+          setChats(prev => prev.map(c => {
+            if (c.id !== chatId) return c;
+            return {
+              ...c,
+              messages: c.messages.map(m => m.id===placeholderId ? errorMsg : m),
+              lastUpdated: new Date().toISOString()
+            };
+          }));
+        }
+        setIsSending(false);
+      };
+
+      const sorted = useMemo(()=> [...chats].sort((a,b)=> new Date(b.lastUpdated) - new Date(a.lastUpdated)), [chats]);
+
+      return (
+        <div className="flex h-screen w-screen">
+          <div className="h-screen overflow-hidden">
+            <Sidebar
+              isOpen={isSidebarOpen}
+              onClose={()=>setIsSidebarOpen(false)}
+              chats={sorted}
+              currentChatId={currentChatId}
+              onSelectChat={selectChat}
+              onCreateNewChat={createNewChat}
+              isMobile={isMobile}
+              onOpenSettings={()=>setSettingsOpen(true)}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <ChatArea chat={currentChat} onSend={onSend} isSending={isSending} onToggleSidebar={toggleSidebar} />
+          </div>
+
+          {/* Settings modal */}
+          {settingsOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/50" onClick={()=>setSettingsOpen(false)} />
+              <div className="relative z-10 w-full max-w-md rounded-xl p-5"
+                   style={{ background:'var(--panel)', border:'1px solid var(--border)'}}>
+                <h3 className="text-lg font-semibold mb-3">Settings</h3>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[color:var(--fg)]">Theme</span>
+                  <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+                          className="px-4 py-2 rounded-md bg-[color:var(--surface)] text-[color:var(--fg)] hover:opacity-90 capitalize">
+                    Toggle {theme === 'dark' ? 'Light' : 'Dark'} Mode
+                  </button>
+                </div>
+
+                <div className="flex justify-end mt-4">
+                  <button onClick={()=>setSettingsOpen(false)}
+                          className="px-4 py-2 rounded-md bg-[color:var(--accent)] text-white hover:opacity-90">
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
